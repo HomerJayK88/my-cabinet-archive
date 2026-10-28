@@ -22,27 +22,39 @@
             position: relative; width: 100vw; height: 100vh;
             display: flex; justify-content: center; align-items: center;
             background-color: #1a1c1e;
+            box-sizing: border-box;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
-        /* CRITICAL FULLSCREEN LAYOUT FIX: Constrains player element boundary checks explicitly */
-        #ruffle-player {
+        /* MATHEMATICAL BOUNDING LOCK: Guarantees a clean, uncropped 4:3 view regardless of window dimensions */
+        #ruffle-container {
+            width: 100%; height: 100%;
+            max-width: calc((100vh - 20px) * 4 / 3);
+            max-height: calc((100vw - 20px) * 3 / 4);
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            background-color: #000;
+        }
+        /* Dynamic viewport injection forces strict viewport compliance */
+        #ruffle-player, ruffle-player, canvas {
             width: 100% !important; height: 100% !important;
-            display: block; position: absolute; top: 0; left: 0;
+            max-width: 100% !important; max-height: 100% !important;
+            display: block !important;
         }
         #mobile-overlay {
             display: none; position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 999; user-select: none; -webkit-user-select: none;
         }
-        .dpad { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 20px; pointer-events: auto; }
-        .action-btn-group { position: absolute; bottom: 30px; right: 30px; display: flex; gap: 15px; pointer-events: auto; }
+        .dpad { position: absolute; bottom: 25px; left: 25px; display: flex; gap: 15px; pointer-events: auto; }
+        .action-btn-group { position: absolute; bottom: 25px; right: 25px; display: flex; gap: 15px; pointer-events: auto; }
         .btn {
-            width: 65px; height: 65px; background-color: rgba(255, 255, 255, 0.25);
-            border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50%;
+            width: 65px; height: 65px; background-color: rgba(255, 255, 255, 0.22);
+            border: 2px solid rgba(255, 255, 255, 0.35); border-radius: 50%;
             color: white; font-weight: bold; font-size: 20px;
             display: flex; justify-content: center; align-items: center; touch-action: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
-        .btn:active { background-color: rgba(255, 255, 255, 0.6); }
-        .btn-large { width: 85px; border-radius: 30px; font-size: 14px; } /* Space/Start Button styling */
+        .btn:active { background-color: rgba(255, 255, 255, 0.55); }
+        .btn-large { width: 85px; border-radius: 30px; font-size: 14px; } 
     </style>
     <script src="https://cloudflare.com"></script>
 </head>
@@ -60,16 +72,16 @@
     </script>
 
     <div id="game-wrapper">
-        <div id="ruffle-player"></div>
+        <div id="ruffle-container">
+            <div id="ruffle-player"></div>
+        </div>
         
-        <!-- Virtual Mobile Touch Layout Interface Layer -->
         <div id="mobile-overlay">
             <div class="dpad">
                 <div class="btn" id="btn-left">◀</div>
                 <div class="btn" id="btn-right">▶</div>
             </div>
             <div class="action-btn-group">
-                <!-- SPACE BUTTON ADDED: Bypasses intro cards smoothly -->
                 <div class="btn btn-large" id="btn-space">SPACE</div>
                 <div class="btn" id="btn-jump">Z</div>
             </div>
@@ -84,12 +96,12 @@
             const container = document.getElementById("ruffle-player");
             container.appendChild(player);
             
-            // ASPECT SCALE RENDERING PROTECTION FIX
+            // Hardlocked alignment configuration profile limits spillover completely
             player.config = { 
                 autoplay: "on", 
                 unmuteOverlay: "hidden", 
                 letterbox: "on",
-                scale: "showAll", // Locks the Game Boy proportions perfectly in the bounds matrix
+                scale: "showAll", 
                 forceScale: true,
                 quality: "low",
                 wmode: "direct",
@@ -99,7 +111,6 @@
             
             player.load("tower_heaven_game.swf");
 
-            // Hardware Mobile Interface Input Mapping Bridge
             if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
                 document.getElementById('mobile-overlay').style.display = 'block';
 
@@ -109,7 +120,6 @@
 
                     buttonElement.addEventListener('touchstart', (e) => {
                         e.preventDefault();
-                        // Target event directly into Ruffle runtime container layer for immediate execution execution
                         player.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, keyCode: keyCodeValue, key: keyString, code: keyString }));
                     });
                     buttonElement.addEventListener('touchend', (e) => {
@@ -121,7 +131,7 @@
                 mapHardwareKey('btn-left', 37, 'ArrowLeft');
                 mapHardwareKey('btn-right', 39, 'ArrowRight');
                 mapHardwareKey('btn-jump', 90, 'KeyZ'); 
-                mapHardwareKey('btn-space', 32, 'Space'); // Map the layout touch signal to Spacebar key register code 32
+                mapHardwareKey('btn-space', 32, 'Space'); 
             }
         });
     </script>
