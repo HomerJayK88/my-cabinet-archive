@@ -1,0 +1,17 @@
+{
+  "short_name": "Arcade Portal",
+  "name": "Private Arcade Portal",
+  "icons": [
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#1a1c1e",
+  "theme_color": "#1a1c1e",
+  "display": "standalone",
+  "orientation": "landscape"
+}
