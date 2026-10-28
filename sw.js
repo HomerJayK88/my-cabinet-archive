@@ -1,6 +1,7 @@
-const CACHE_NAME = 'secure-arcade-cache-v3';
+const CACHE_NAME = 'secure-arcade-cache-v5';
 const ASSETS = [
   'index.html',
+  'ruffle.js',
   'tower_heaven_game.swf',
   'manifest.json',
   'icon.png'
