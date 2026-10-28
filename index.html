@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Privacy Security: Blocks Google and Bing from indexing this site -->
+    <meta name="robots" content="noindex, nofollow">
+    <title>Arcade Portal</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #1a1c1e; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            font-family: sans-serif;
+        }
+        #game-wrapper {
+            position: relative; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #ruffle-player {
+            width: 100%; height: 100%; max-width: 640px; max-height: 480px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #mobile-overlay {
+            display: none; position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 999; user-select: none; -webkit-user-select: none;
+        }
+        .dpad { position: absolute; bottom: 40px; left: 30px; display: flex; gap: 20px; pointer-events: auto; }
+        .action-btn { position: absolute; bottom: 40px; right: 30px; pointer-events: auto; }
+        .btn {
+            width: 70px; height: 70px; background-color: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50%;
+            color: white; font-weight: bold; font-size: 24px;
+            display: flex; justify-content: center; align-items: center; touch-action: none;
+        }
+        .btn:active { background-color: rgba(255, 255, 255, 0.6); }
+    </style>
+    <script src="https://unpkg.com"></script>
+</head>
+<body>
+
+    <script>
+        // Security Gatekeeper: Prompts before loading any layout structure
+        const familyPassword = "heaven123"; 
+        const accessAttempt = prompt("Please enter the private family access password to play:");
+        
+        if (accessAttempt !== familyPassword) {
+            document.body.innerHTML = "<div style='color:#7a876e; font-family:monospace; font-size:18px; text-align:center; padding-top:40vh;'><h2>ACCESS DENIED.</h2></div>";
+            window.stop(); // Instantly breaks network requests to prevent unauthorized data snooping
+        }
+    </script>
+
+    <div id="game-wrapper">
+        <div id="ruffle-player"></div>
+        <div id="mobile-overlay">
+            <div class="dpad">
+                <div class="btn" id="btn-left">◀</div>
+                <div class="btn" id="btn-right">▶</div>
+            </div>
+            <div class="action-btn">
+                <div class="btn" id="btn-jump">Z</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.addEventListener("DOMContentLoaded", () => {
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            const container = document.getElementById("ruffle-player");
+            container.appendChild(player);
+            
+            player.config = { autoplay: "on", unmuteOverlay: "hidden", letterbox: "on" };
+            
+            // Loads the updated game cartridge file name
+            player.load("tower_heaven_game.swf");
+
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                document.getElementById('mobile-overlay').style.display = 'block';
+
+                const mapHardwareKey = (elementId, keyCodeValue, keyString) => {
+                    const buttonElement = document.getElementById(elementId);
+                    buttonElement.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, keyCode: keyCodeValue, key: keyString, code: keyString }));
+                    });
+                    buttonElement.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        window.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, cancelable: true, keyCode: keyCodeValue, key: keyString, code: keyString }));
+                    });
+                };
+
+                mapHardwareKey('btn-left', 37, 'ArrowLeft');
+                mapHardwareKey('btn-right', 39, 'ArrowRight');
+                mapHardwareKey('btn-jump', 90, 'KeyZ'); 
+            }
+        });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+    </script>
+</body>
+</html>
