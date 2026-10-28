@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Privacy Security: Blocks Google and Bing from indexing this site -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
     <title>Arcade Portal</title>
     
@@ -20,29 +19,30 @@
             font-family: sans-serif;
         }
         #game-wrapper {
-            position: relative; width: 100%; height: 100%;
+            position: relative; width: 100vw; height: 100vh;
             display: flex; justify-content: center; align-items: center;
+            background-color: #1a1c1e;
         }
+        /* CRITICAL FULLSCREEN LAYOUT FIX: Constrains player element boundary checks explicitly */
         #ruffle-player {
-            width: 100vw; height: 100vh;
-            display: block;
-            /* Force GPU Hardware Acceleration via CSS */
-            transform: translate3d(0,0,0);
-            -webkit-transform: translate3d(0,0,0);
+            width: 100% !important; height: 100% !important;
+            display: block; position: absolute; top: 0; left: 0;
         }
         #mobile-overlay {
             display: none; position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 999; user-select: none; -webkit-user-select: none;
         }
-        .dpad { position: absolute; bottom: 40px; left: 30px; display: flex; gap: 20px; pointer-events: auto; }
-        .action-btn { position: absolute; bottom: 40px; right: 30px; pointer-events: auto; }
+        .dpad { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 20px; pointer-events: auto; }
+        .action-btn-group { position: absolute; bottom: 30px; right: 30px; display: flex; gap: 15px; pointer-events: auto; }
         .btn {
-            width: 70px; height: 70px; background-color: rgba(255, 255, 255, 0.25);
+            width: 65px; height: 65px; background-color: rgba(255, 255, 255, 0.25);
             border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50%;
-            color: white; font-weight: bold; font-size: 24px;
+            color: white; font-weight: bold; font-size: 20px;
             display: flex; justify-content: center; align-items: center; touch-action: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .btn:active { background-color: rgba(255, 255, 255, 0.6); }
+        .btn-large { width: 85px; border-radius: 30px; font-size: 14px; } /* Space/Start Button styling */
     </style>
     <script src="https://cloudflare.com"></script>
 </head>
@@ -61,12 +61,16 @@
 
     <div id="game-wrapper">
         <div id="ruffle-player"></div>
+        
+        <!-- Virtual Mobile Touch Layout Interface Layer -->
         <div id="mobile-overlay">
             <div class="dpad">
                 <div class="btn" id="btn-left">◀</div>
                 <div class="btn" id="btn-right">▶</div>
             </div>
-            <div class="action-btn">
+            <div class="action-btn-group">
+                <!-- SPACE BUTTON ADDED: Bypasses intro cards smoothly -->
+                <div class="btn btn-large" id="btn-space">SPACE</div>
                 <div class="btn" id="btn-jump">Z</div>
             </div>
         </div>
@@ -80,40 +84,44 @@
             const container = document.getElementById("ruffle-player");
             container.appendChild(player);
             
-            // PERFORMANCE FIXES: Locks low rendering quality to drop slow antialiasing algorithms
+            // ASPECT SCALE RENDERING PROTECTION FIX
             player.config = { 
                 autoplay: "on", 
                 unmuteOverlay: "hidden", 
                 letterbox: "on",
-                scale: "showAll",
+                scale: "showAll", // Locks the Game Boy proportions perfectly in the bounds matrix
                 forceScale: true,
-                quality: "low",                // Cuts resource heavy edge-smoothing filters
-                wmode: "direct",               // Bypasses the HTML layer to use direct GPU draw loops
-                preferWasm: true,              // Gives internal assembly processing priority
-                contextMenu: "off",            // Shuts off accidental right click lag triggers
-                backgroundExecutionMode: "stop"// Saves device battery and loops
+                quality: "low",
+                wmode: "direct",
+                preferWasm: true,
+                backgroundExecutionMode: "stop"
             };
             
             player.load("tower_heaven_game.swf");
 
+            // Hardware Mobile Interface Input Mapping Bridge
             if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
                 document.getElementById('mobile-overlay').style.display = 'block';
 
                 const mapHardwareKey = (elementId, keyCodeValue, keyString) => {
                     const buttonElement = document.getElementById(elementId);
+                    if (!buttonElement) return;
+
                     buttonElement.addEventListener('touchstart', (e) => {
                         e.preventDefault();
-                        window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, keyCode: keyCodeValue, key: keyString, code: keyString }));
+                        // Target event directly into Ruffle runtime container layer for immediate execution execution
+                        player.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, keyCode: keyCodeValue, key: keyString, code: keyString }));
                     });
                     buttonElement.addEventListener('touchend', (e) => {
                         e.preventDefault();
-                        window.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, cancelable: true, keyCode: keyCodeValue, key: keyString, code: keyString }));
+                        player.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, cancelable: true, keyCode: keyCodeValue, key: keyString, code: keyString }));
                     });
                 };
 
                 mapHardwareKey('btn-left', 37, 'ArrowLeft');
                 mapHardwareKey('btn-right', 39, 'ArrowRight');
                 mapHardwareKey('btn-jump', 90, 'KeyZ'); 
+                mapHardwareKey('btn-space', 32, 'Space'); // Map the layout touch signal to Spacebar key register code 32
             }
         });
     </script>
