@@ -41,18 +41,19 @@
         }
         .btn:active { background-color: rgba(255, 255, 255, 0.6); }
     </style>
-    <script src="https://cloudflare.com"></script>
+    <!-- Verified Stable Emulator Script Resource Link -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ruffle-rs/0.1.0-nightly.2024.4.12/ruffle.min.js"></script>
 </head>
 <body>
 
     <script>
-        // Security Gatekeeper: Prompts before loading any layout structure
+        // Security Gatekeeper
         const familyPassword = "Heaven123"; 
         const accessAttempt = prompt("Please enter the private family access password to play:");
         
         if (accessAttempt !== familyPassword) {
             document.body.innerHTML = "<div style='color:#7a876e; font-family:monospace; font-size:18px; text-align:center; padding-top:40vh;'><h2>ACCESS DENIED.</h2></div>";
-            window.stop(); // Instantly breaks network requests to prevent unauthorized data snooping
+            window.stop();
         }
     </script>
 
@@ -79,7 +80,7 @@
             
             player.config = { autoplay: "on", unmuteOverlay: "hidden", letterbox: "on" };
             
-            // Loads the updated game cartridge file name
+            // Core Game Entry Target Link
             player.load("tower_heaven_game.swf");
 
             if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
