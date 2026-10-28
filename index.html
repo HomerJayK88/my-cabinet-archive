@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Privacy Security: Blocks Google and Bing from indexing this site -->
     <meta name="robots" content="noindex, nofollow">
     <title>Arcade Portal</title>
     
@@ -25,7 +26,6 @@
             box-sizing: border-box;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
-        /* MATHEMATICAL BOUNDING LOCK: Guarantees a clean, uncropped 4:3 view regardless of window dimensions */
         #ruffle-container {
             width: 100%; height: 100%;
             max-width: calc((100vh - 20px) * 4 / 3);
@@ -34,7 +34,6 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.7);
             background-color: #000;
         }
-        /* Dynamic viewport injection forces strict viewport compliance */
         #ruffle-player, ruffle-player, canvas {
             width: 100% !important; height: 100% !important;
             max-width: 100% !important; max-height: 100% !important;
@@ -56,7 +55,8 @@
         .btn:active { background-color: rgba(255, 255, 255, 0.55); }
         .btn-large { width: 85px; border-radius: 30px; font-size: 14px; } 
     </style>
-    <script src="https://cloudflare.com"></script>
+    <!-- FIX: Swapped out cdnjs for the unified jsDelivr production distribution bundle -->
+    <script src="https://jsdelivr.net"></script>
 </head>
 <body>
 
@@ -96,14 +96,12 @@
             const container = document.getElementById("ruffle-player");
             container.appendChild(player);
             
-            // Hardlocked alignment configuration profile limits spillover completely
             player.config = { 
                 autoplay: "on", 
                 unmuteOverlay: "hidden", 
                 letterbox: "on",
                 scale: "showAll", 
                 forceScale: true,
-                quality: "low",
                 wmode: "direct",
                 preferWasm: true,
                 backgroundExecutionMode: "stop"
